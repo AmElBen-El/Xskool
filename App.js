@@ -1,110 +1,68 @@
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Text, ScrollView, TouchableOpacity, Image, View } from 'react-native';
-import Homescreen from './Framework/Screens/Homescreen';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faFilePdf, faBarsProgress, faBook, faDownload, faBookOpen, faFilm, faPeopleGroup, faComment, faFunnelDollar, faFeed,  } from '@fortawesome/free-solid-svg-icons';
-import { Fascinate_400Regular } from '@expo-google-fonts/fascinate';
-import { faFreeCodeCamp, faSuperpowers } from '@fortawesome/free-brands-svg-icons';
-import { faContactBook } from '@fortawesome/free-regular-svg-icons/faContactBook';
-import { faContactCard } from '@fortawesome/free-regular-svg-icons/faContactCard';
+import { useEffect, useState, useCallback } from "react";
+import { KeyboardAvoidingView, LogBox, Platform } from "react-native";
+import {
+  Montserrat_100Thin, Montserrat_200ExtraLight, Montserrat_300Light, Montserrat_400Regular,
+  Montserrat_500Medium, Montserrat_600SemiBold, Montserrat_700Bold, Montserrat_800ExtraBold, Montserrat_900Black
+} from "@expo-google-fonts/montserrat"
+import * as SplashScreen from "expo-splash-screen";
+import * as Font from "expo-font";
+import { Preloader } from "./Framework/Components/Preloader";
+import { AppProvider } from "./global/globalVariables";
+import { RootSiblingParent } from "react-native-root-siblings";
+import { Fascinate_400Regular } from "@expo-google-fonts/fascinate"
+import { StackNavigator } from "./Framework/Navigators/Stack";
 
+
+LogBox.ignoreLogs(["ViewPropTypes will be removed from React Native, along with all other PropTypes. We recommend that you migrate away from PropTypes and switch to a type system like TypeScript. If you need to continue using ViewPropTypes, migrate to the 'deprecated-react-native-prop-types' package."])
 
 export default function App() {
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await Font.loadAsync({ Fascinate_400Regular });
+        await Font.loadAsync({ Montserrat_100Thin });
+        await Font.loadAsync({ Montserrat_200ExtraLight });
+        await Font.loadAsync({ Montserrat_300Light });
+        await Font.loadAsync({ Montserrat_400Regular });
+        await Font.loadAsync({ Montserrat_500Medium });
+        await Font.loadAsync({ Montserrat_600SemiBold });
+        await Font.loadAsync({ Montserrat_700Bold });
+        await Font.loadAsync({ Montserrat_800ExtraBold });
+        await Font.loadAsync({ Montserrat_900Black });
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View>
-        <Image source={require("./assets/Xskool-v-gold.png")} style={{height:225, width:225, alignSelf:"center", backgroundColor:"#fffffff2", borderRadius:45, marginTop:20}}/>
-        <Text style={styles.content}>Welcome Home to XSkool, where you learn something Extra to what you know before now to have an edge in the modern world.</Text>
-        <Text style={{alignSelf:"center", fontFamily:Fascinate_400Regular, fontWeight:"900", color:"white",marginTop:10,fontStyle:'italic', fontSize: 27}}>Explore</Text>
-        {/* <Homescreen/> */}
-        {/* <StatusBar style="auto" /> */}
-      </View>
-      <View style={styles.gridContainer } contentContainerStyle={{justifyContent: 'space-between'}} >
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faBook} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Courses</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faDownload} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Downloads</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faBookOpen} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Lectures</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faFilm} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Videos</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faPeopleGroup} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Communities</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faBarsProgress} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Progress</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faComment} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Testimonials</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faFunnelDollar} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Sponsorship</Text>
-      </TouchableOpacity> 
-      <TouchableOpacity style={styles.gridItem} >
-          <FontAwesomeIcon icon={faContactCard} size= {25} color="white" style={{alignSelf:"center"}}/>
-          <Text style={styles.ftitle}>Support</Text>
-      </TouchableOpacity> 
-      </View>
-      
-    </SafeAreaView>
+    <RootSiblingParent>
+      <AppProvider>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <StackNavigator />
+          <Preloader />
+        </KeyboardAvoidingView>
+      </AppProvider>
+    </RootSiblingParent>
   );
 }
-
-const styles = StyleSheet.create({
-      container: {
-        flex: 1,
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#080062ea',
-      },
-      ftitle: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: 'white',
-         fontFamily:Fascinate_400Regular,
-         alignSelf:"center"
-      },
-      subtitle: {
-        fontSize: 18,
-        color: '#665',
-        marginBottom: 20,
-        textAlign: 'center',
-      },
-      content: {
-        fontSize: 15,
-        color: '#fff',
-        textAlign: 'justify',
-        marginTop: 15,
-        },
-      gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
-        marginTop: 15,
-        gap: 3,
-        borderRadius:18,
-        backgroundColor:"#080062cc",
-      },
-      gridItem: {
-        width: '30%',
-        borderColor: 'gold',
-        padding: 6,
-        borderRadius: 18,
-        borderWidth: 1,
-        alignItems: 'center',
-      },
-    });
-  
-//design home screen and about page

@@ -24,6 +24,8 @@ import { Feather, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faGoogle, faXTwitter } from "@fortawesome/free-brands-svg-icons";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../Firebase/Settings";
 
 const { width, height } = Dimensions.get('window');
 
@@ -33,7 +35,7 @@ const validation = yup.object({
 });
 
 
-export function Login({ navigation }) {
+export function Login({ navigation, route }) {
     const { setPreloader, setUserUID } = useContext(AppContext);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -41,50 +43,51 @@ export function Login({ navigation }) {
 
     };
 
+    // const { uid } = route.params
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <LinearGradient
                 colors={['#ffffff', Theme.colors.primary + 40]}
                 style={styles.gradient}
             >
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    style={styles.keyboardView}
-                >
-                    <ScrollView contentContainerStyle={styles.scrollView}>
-                        <View style={styles.logoContainer}>
-                            <Image
-                                source={require("../../assets/logo.jpg")}
-                                style={styles.logo}
-                                resizeMode="contain"
-                            />
-                        </View>
+                <ScrollView contentContainerStyle={styles.scrollView}>
+                    <View style={styles.logoContainer}>
+                        <Image
+                            source={require("../../assets/Xskool-v-gold.png")}
+                            style={styles.logo}
+                            resizeMode="contain"
+                        />
+                    </View>
 
-                        <View style={styles.card}>
-                            <Formik
-                                initialValues={{ email: "", password: "" }}
-                                onSubmit={(value) => {
-                                    setPreloader(true);
-                                    signInWithEmailAndPassword(auth, value.email, value.password)
-                                        .then((data) => {
-                                            setPreloader(false);
-                                            setUserUID(data.user.uid);
-                                            navigation.replace("HomeScreen");
-                                        })
-                                        .catch((e) => {
-                                            setPreloader(false);
-                                            Alert.alert("Access denied!", errorMessage(e.code));
-                                        });
-                                }}
-                                validationSchema={validation}
-                            >
-                                {(prop) => {
-                                    return (
-                                        <View style={styles.form}>
-                                            <View style={styles.headerContainer}>
-                                                <Text style={styles.header}>Welcome Back</Text>
-                                                <Text style={styles.subheader}>
-                                                    Sign in to continue to YotaPoint
+                    <View style={styles.card}>
+                        <Formik
+                            initialValues={{ email: "", password: "" }}
+                            onSubmit={(value) => {
+                                setPreloader(true);
+                                signInWithEmailAndPassword(auth, value.email, value.password)
+                                    .then((userCredential) => {
+                                        const user = userCredential.user.uid;
+                                        setPreloader(false);
+                                        setUserUID(user);
+                                        navigation.replace("HomeScreen");
+                                    })
+                                    .catch((e) => {
+                                        setPreloader(false);
+                                        console.log(e);
+                                        Alert.alert("Access denied!", errorMessage(e.code));
+                                    });
+                            }}
+                            validationSchema={validation}
+                        >
+                            {(prop) => {
+                                return (
+                                    <View style={styles.form}>
+                                        <View style={styles.headerContainer}>
+                                            <Text style={styles.header}>Welcome Back</Text>
+                                            <Text style={styles.subheader}>
+                                                {/* {uid + '\n'} */}
+                                                    Sign in to continue to Xskool.
                                                 </Text>
                                             </View>
 
@@ -207,8 +210,8 @@ export function Login({ navigation }) {
                                 <Text style={styles.signupLink}>Sign up</Text>
                             </TouchableOpacity>
                         </View>
-                    </ScrollView>
-                </KeyboardAvoidingView>
+                </ScrollView>
+                
             </LinearGradient>
         </SafeAreaView>
     );
